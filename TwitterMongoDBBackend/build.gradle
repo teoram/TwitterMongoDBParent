@@ -1,0 +1,14 @@
+project(':TwitterMongoDBBackend') {	
+	jar {
+		manifest {
+			attributes 'Implementation-Title': 'Spring Boot Web App Back End', 'Implementation-Version': version
+		}
+	}
+
+ 
+    dependencies {
+		compile fileTree(dir: 'lib', include: '*.jar')
+		
+		compile('org.springframework:spring-context:4.0.6.RELEASE')
+    }
+}

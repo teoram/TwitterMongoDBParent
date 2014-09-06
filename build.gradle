@@ -1,0 +1,52 @@
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.4.RELEASE")
+	}
+}
+
+allprojects {
+    apply plugin: 'java'
+	apply plugin: 'eclipse'
+
+ 
+    version = '0.1.0-SNAPSHOT'
+ 
+    repositories {
+        mavenCentral()
+    }
+	
+    dependencies {
+        testCompile 'junit:junit:4.11'
+        testCompile 'org.mockito:mockito-all:1.9.5'
+        testCompile 'org.assertj:assertj-core:1.5.0'
+    }
+
+
+}
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
