@@ -70,6 +70,9 @@ function Tweet( resource ) {
 				
 				var dataAsText = JSON.stringify(response);
 				$('#queryResponsePrint').text(dataAsText);
+				
+				loadReport(response);
+				
 			});
 		}
 	 };
@@ -101,7 +104,66 @@ tweetApp.controller("queryController", [ '$scope','tweetService', function($scop
 }]);
 
 
-
+function loadReport(data) {
+	var ranks = [];
+	var festivalsarray = [];
+	var completeData = [];
+	for (var rankFestival in data.rank) {
+		ranks.push(data.rank[rankFestival]);
+		festivalsarray.push(rankFestival);
+		completeData.push({name: rankFestival, y:data.rank[rankFestival]});
+	}
+	
+	$('#chartsContainer').highcharts({
+	    chart: {
+	        type: "column"
+	    },
+	    title: {
+	        text: ' festivals rating for words you entered '
+	    },
+	    xAxis: {
+	    	categories: festivalsarray
+	    },
+	    yAxis: {
+	        title: {
+	            text: 'Rating'
+	        }
+	    },
+	    tooltip: {
+            formatter: function() {
+                return '<b>'+ this.series.name +'</b><br/>: '+ this.y;
+        	}
+        },
+	    series: [{name: 'ranks for festivals',
+	    	 data:ranks,
+	    	 stack:'test'}]
+	});
+	
+	$('#chartsContainer2').highcharts({
+		chart: {
+			type: "column"
+		},
+		title: {
+			text: ' festivals rating for words you entered '
+		},
+		xAxis: {
+			categories: festivalsarray
+		},
+		yAxis: {
+			title: {
+				text: 'Rating'
+			}
+		},
+		tooltip: {
+			formatter: function() {
+				return '<b>'+ this.series.name +'</b><br/>: '+ this.y;
+			}
+		},
+		series: [{type: 'pie', 
+			name:'pie overview',
+			data:completeData}]
+	});
+}
 
 
 
