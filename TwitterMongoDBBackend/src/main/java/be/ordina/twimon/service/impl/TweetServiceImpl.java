@@ -295,7 +295,7 @@ public class TweetServiceImpl implements TweetService {
 				countRecords.add(new FestivalWordCountDTO(word, record.get("_id").toString()
 						, Integer.valueOf(record.get("count").toString())));
 			}
-			countRecords.sort(FestivalWordCountDTO.festivalWordCountComparator);
+			//countRecords..sort(FestivalWordCountDTO.festivalWordCountComparator);
 			festivalRankDTO.getFestivalsPerWord().put(word, countRecords);
 			
 			System.out.println("Found " + countRecords.size() + " records for word " + word);
