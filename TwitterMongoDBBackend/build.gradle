@@ -7,11 +7,11 @@ project(':TwitterMongoDBBackend') {
 
  
     dependencies {
-		compile fileTree(dir: 'lib', include: '*.jar')
+	compile fileTree(dir: 'lib', include: '*.jar')
 		
-		compile('org.springframework:spring-context:4.0.6.RELEASE')
+	compile('org.springframework:spring-context:4.0.6.RELEASE')
 		
-		compile('org.apache.camel:camel-servlet:2.14.0')
+	compile('org.apache.camel:camel-servlet:2.14.0')
     	compile('org.apache.camel:camel-spring-javaconfig:2.14.0')
     }
 }

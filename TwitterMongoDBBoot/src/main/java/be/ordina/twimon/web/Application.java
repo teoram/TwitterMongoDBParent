@@ -17,8 +17,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import be.ordina.twimon.route.MyRouteBuilder;
+import be.ordina.twimon.route.MessageConsumer;
+import be.ordina.twimon.route.TwitterRouteBuilder;
+import be.ordina.twimon.service.MessageService;
 import be.ordina.twimon.service.TweetService;
+import be.ordina.twimon.service.impl.MessageServiceImpl;
 import be.ordina.twimon.service.impl.TweetServiceImpl;
 import be.ordina.twimon.web.config.ConnectionSettings;
 
@@ -30,16 +33,18 @@ public class Application {
 	
 	private static final String CAMEL_URL_MAPPING = "/camel/*";
     private static final String CAMEL_SERVLET_NAME = "CamelServlet";
+    
+    private static ApplicationContext applicationContext;
 
     public static void main(String[] args) {
-        ApplicationContext ctx = SpringApplication.run(Application.class, args);
+        applicationContext = SpringApplication.run(Application.class, args);
 
         System.out.println("Let's inspect the beans provided by Spring Boot:");
 
-        String[] beanNames = ctx.getBeanDefinitionNames();
+        String[] beanNames = applicationContext.getBeanDefinitionNames();
         Arrays.sort(beanNames);
         for (String beanName : beanNames) {
-            System.out.println(beanName);
+            System.out.println("bean: " + beanName);
         }
     }
     
@@ -47,14 +52,17 @@ public class Application {
     private ConnectionSettings connectionSettings;
     
     @Bean
-    public TweetService getTweetServiceBean() {
+    public TweetService tweetServiceBean() {
     	return new TweetServiceImpl(connectionSettings.getConsumerKey()
     			, connectionSettings.getConsumerSecret()
     			, connectionSettings.getAccessToken()
     			, connectionSettings.getAccessTokenSecret());
     }
     
-    
+    @Bean
+    public MessageService messageServiceBean() throws Exception {
+    	return new MessageServiceImpl(camelContext(applicationContext));
+    }
     
     
     @Bean
@@ -68,16 +76,25 @@ public class Application {
     @Bean
     public SpringCamelContext camelContext(ApplicationContext applicationContext) throws Exception {
         SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
-        camelContext.addRoutes(routeBuilder());
-        return camelContext;
+       camelContext.addRoutes(routeBuilder());
+       
+       
+       MessageConsumer messageConsumer = messageConsumer();
+       messageConsumer.setConsumer(camelContext.createConsumerTemplate());
+       messageConsumer.setProducer(camelContext.createProducerTemplate());
+        
+       return camelContext;
     }
  
     @Bean
     public RouteBuilder routeBuilder() {
-        return new MyRouteBuilder();
+        return new TwitterRouteBuilder();
     }
     
-    
+    @Bean
+    public MessageConsumer messageConsumer() {
+    	return new  MessageConsumer();
+    }
     
     
 

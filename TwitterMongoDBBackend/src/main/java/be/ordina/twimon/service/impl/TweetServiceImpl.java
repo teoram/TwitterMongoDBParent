@@ -148,6 +148,80 @@ public class TweetServiceImpl implements TweetService {
 			
 		}
 	}
+	
+	
+	@Override
+	public List<DBObject> retrieveTweetsByPagingCollection(){
+		DBCollection tempToFollowCollection = db.getCollection("toFollow");
+
+		DBCursor cursor = tempToFollowCollection.find(new BasicDBObject());
+
+		List<DBObject> toFollowList = new ArrayList<DBObject>();
+		while (cursor.hasNext()) {
+			toFollowList.add(cursor.next());
+		}
+
+		System.out.println(toFollowList);
+		
+		return toFollowList;
+	}
+	
+	@Override
+	public String handleRetrieveTweetsForSingleQuery(DBObject toFollowEntry) {
+		if (twitterConfiguration == null) {
+			twitterConfiguration = cb.build();
+		}
+		Long maxIdRetrieved = null;
+		Long sinceIdRetrieved = null;
+
+		TwitterFactory tf = new TwitterFactory(twitterConfiguration);
+		Twitter twitter = tf.getInstance();
+		
+		try {
+			Query queryMaxTwitter = createMaxIdQuery(toFollowEntry);
+			
+			List<Status> tweets = getTweetsFromTwitter(toFollowEntry,
+					twitter, queryMaxTwitter);
+			
+			if (toFollowEntry.get("sinceId") != null) {
+				Query querySinceTwitter = createSinceIdQuery(toFollowEntry);
+				tweets.addAll(getTweetsFromTwitter(toFollowEntry,
+						twitter, querySinceTwitter));
+			}
+			
+			for (Status tweet : tweets) {
+				BasicDBObject basicObj = createTweetDBObject(tweet, toFollowEntry.get("festival").toString());
+				try {
+					tweetCollection.insert(basicObj);
+				} catch (Exception e) {
+					System.out.println("MongoDB Error : "
+							+ e.getMessage());
+				}
+				
+				if (maxIdRetrieved == null || tweet.getId() < maxIdRetrieved) {
+					System.out.println("update max id to  " + tweet.getId());
+					maxIdRetrieved = tweet.getId();
+				}
+				
+				if (sinceIdRetrieved == null ||tweet.getId() > sinceIdRetrieved) {
+					System.out.println("update since id to  " + tweet.getId());
+					sinceIdRetrieved = tweet.getId();
+				}
+			}
+			
+			// Printing fetched records from DB.
+		} catch (TwitterException te) {
+			handleTwitterException(te);
+		}
+		
+		System.out.println("with Max ID retrieved... " + maxIdRetrieved);
+		System.out.println("with Since ID retrieved... " + sinceIdRetrieved);
+		updateIdsRetrieved(toFollowEntry, maxIdRetrieved, sinceIdRetrieved);
+		
+		return "OK for " + toFollowEntry + " with maxIdRetrieved = '" + maxIdRetrieved 
+				+ "' and sinceIdRetrieved = '" + sinceIdRetrieved + "'";
+	}
+	
 
 	private Query createMaxIdQuery(DBObject toFollowEntry) {
 		Query queryTwitter = new Query(toFollowEntry.get("follow").toString());
@@ -331,58 +405,6 @@ public class TweetServiceImpl implements TweetService {
 		return festivalRankDTO;
 	}
 		
-	
 
-	@Override
-	public void retrieveTweets() {
-		if (toFollowCollection == null) {
-			toFollowCollection = db.getCollection("toFollow");
-		}
-		if (tweetCollection == null) {
-			tweetCollection = db.getCollection("tweetColl");
-		}
-
-		BasicDBObject fields = new BasicDBObject("_id", true).append("follow",
-				true).append("festival", true);
-		DBCursor cursor = toFollowCollection.find(new BasicDBObject(), fields);
-
-		List<String> toFollowList = new ArrayList<String>();
-		while (cursor.hasNext()) {
-			toFollowList.add(cursor.next().get("follow").toString());
-		}
-
-		System.out.println(toFollowList);
-		
-		for (String toFollow : toFollowList) {
-			if (twitterConfiguration == null) {
-				twitterConfiguration = cb.build();
-			}
-
-			TwitterFactory tf = new TwitterFactory(twitterConfiguration);
-			Twitter twitter = tf.getInstance();
-			try {
-				Query query = new Query(toFollow);
-				query.setCount(50);
-				QueryResult result;
-				result = twitter.search(query);
-				System.out.println("Getting Tweets...");
-				List<Status> tweets = result.getTweets();
-				for (Status tweet : tweets) {
-					BasicDBObject basicObj = createTweetDBObject(tweet, "dummy");
-					try {
-						tweetCollection.insert(basicObj);
-					} catch (Exception e) {
-						System.out.println("MongoDB Connection Error : "
-								+ e.getMessage());
-					}
-				}
-				// Printing fetched records from DB.
-			} catch (TwitterException te) {
-				handleTwitterException(te);
-			}
-
-		}
-
-	}
 
 }
