@@ -3,6 +3,7 @@ package be.ordina.twimon.web;
 import java.util.Arrays;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.metrics.routepolicy.MetricsRoutePolicyFactory;
 import org.apache.camel.component.servlet.CamelHttpTransportServlet;
 import org.apache.camel.spring.SpringCamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 import be.ordina.twimon.route.MessageConsumer;
 import be.ordina.twimon.route.TwitterRouteBuilder;
+import be.ordina.twimon.route.TwitterRouteWithExceptionBuilder;
 import be.ordina.twimon.service.MessageService;
 import be.ordina.twimon.service.TweetService;
 import be.ordina.twimon.service.impl.MessageServiceImpl;
@@ -77,6 +79,9 @@ public class Application {
     public SpringCamelContext camelContext(ApplicationContext applicationContext) throws Exception {
         SpringCamelContext camelContext = new SpringCamelContext(applicationContext);
        camelContext.addRoutes(routeBuilder());
+       camelContext.addRoutes(routeBuilderWithException());
+       
+       camelContext.addRoutePolicyFactory(new MetricsRoutePolicyFactory());
        
        
        MessageConsumer messageConsumer = messageConsumer();
@@ -89,6 +94,10 @@ public class Application {
     @Bean
     public RouteBuilder routeBuilder() {
         return new TwitterRouteBuilder();
+    }
+    @Bean
+    public RouteBuilder routeBuilderWithException() {
+    	return new TwitterRouteWithExceptionBuilder();
     }
     
     @Bean

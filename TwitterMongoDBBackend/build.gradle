@@ -14,5 +14,7 @@ project(':TwitterMongoDBBackend') {
 		compile('org.apache.camel:camel-servlet:2.14.0')
     	compile('org.apache.camel:camel-spring-javaconfig:2.14.0')
     	compile('org.apache.camel:camel-stream:2.14.0')
+    	compile('org.apache.camel:camel-metrics:2.14.0')
+    	
     }
 }

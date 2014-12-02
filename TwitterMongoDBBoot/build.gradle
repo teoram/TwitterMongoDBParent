@@ -20,6 +20,7 @@ project(':TwitterMongoDBBoot') {
 		// end::jetty[]
 		// tag::actuator[]
 		compile("org.springframework.boot:spring-boot-starter-actuator")
+		compile "org.jolokia:jolokia-core"
 		// end::actuator[]
     }
 }
