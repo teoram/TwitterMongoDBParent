@@ -18,6 +18,6 @@ public interface TweetService {
 
 	List<DBObject> retrieveTweetsByPagingCollection();
 
-	String handleRetrieveTweetsForSingleQuery(DBObject toFollowEntry);
+	DBObject handleRetrieveTweetsForSingleQuery(DBObject toFollowEntry);
 
 }

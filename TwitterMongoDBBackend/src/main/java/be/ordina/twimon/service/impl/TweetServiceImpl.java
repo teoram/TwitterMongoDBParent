@@ -153,7 +153,6 @@ public class TweetServiceImpl implements TweetService {
 	@Override
 	public List<DBObject> retrieveTweetsByPagingCollection(){
 		DBCollection tempToFollowCollection = db.getCollection("toFollow");
-
 		DBCursor cursor = tempToFollowCollection.find(new BasicDBObject());
 
 		List<DBObject> toFollowList = new ArrayList<DBObject>();
@@ -167,9 +166,12 @@ public class TweetServiceImpl implements TweetService {
 	}
 	
 	@Override
-	public String handleRetrieveTweetsForSingleQuery(DBObject toFollowEntry) {
+	public DBObject handleRetrieveTweetsForSingleQuery(DBObject toFollowEntry) {
 		if (twitterConfiguration == null) {
 			twitterConfiguration = cb.build();
+		}
+		if (tweetCollection == null) {
+			tweetCollection = db.getCollection("tweetColl");
 		}
 		Long maxIdRetrieved = null;
 		Long sinceIdRetrieved = null;
@@ -216,10 +218,14 @@ public class TweetServiceImpl implements TweetService {
 		
 		System.out.println("with Max ID retrieved... " + maxIdRetrieved);
 		System.out.println("with Since ID retrieved... " + sinceIdRetrieved);
+		
 		updateIdsRetrieved(toFollowEntry, maxIdRetrieved, sinceIdRetrieved);
 		
-		return "OK for " + toFollowEntry + " with maxIdRetrieved = '" + maxIdRetrieved 
-				+ "' and sinceIdRetrieved = '" + sinceIdRetrieved + "'";
+		System.out.println("OK for " + toFollowEntry.get("follow"));
+		
+		BasicDBObject searchQuery = new BasicDBObject().append("_id", toFollowEntry.get("_id"));
+		
+		return toFollowCollection.findOne(searchQuery);
 	}
 	
 
@@ -289,12 +295,18 @@ public class TweetServiceImpl implements TweetService {
 
 	private void updateIdsRetrieved(DBObject toFollowEntry,
 			Long maxIdRetrieved, Long sinceIdRetrieved) {
+		
+		if (toFollowCollection == null) {
+			toFollowCollection = db.getCollection("toFollow");
+		}
+		
+		
 		if (maxIdRetrieved != null) {
 			System.out.println("update maxID to " + maxIdRetrieved);
 			toFollowEntry.put("maxId", maxIdRetrieved);
 		}
 		if (sinceIdRetrieved != null) {
-			System.out.println("update maxID to " + maxIdRetrieved);
+			System.out.println("update sinceId to " + sinceIdRetrieved);
 			toFollowEntry.put("sinceId", sinceIdRetrieved);
 		}
 		

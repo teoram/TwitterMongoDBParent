@@ -24,6 +24,8 @@ public class MessageConsumer {
     	String msgBody = "";
     	System.out.println("msgBody set");
     	
+    	int count = 1;
+    	
         while (count < 5) {
             // receive the message from the queue, wait at most 1 sec
             String msg = consumer.receiveBody("seda:messageQueue", 1000, String.class);
@@ -32,9 +34,11 @@ public class MessageConsumer {
                 // no more messages in queue
                 break;
             }
- 
+
+            count = count + 1; 
+            
             // do something with body
-            msgBody = "Message " + count + ": "+ msg + "<br>";
+            msgBody = msgBody + "Message " + count + ": "+ msg + "<br>";
         }
         
         if (msgBody.length() == 0) {
