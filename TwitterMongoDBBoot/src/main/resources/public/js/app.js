@@ -1,9 +1,12 @@
 
-var tweetApp = angular.module("tweetApp", [ 'ngRoute', 'ngResource' ]);
+var tweetApp = angular.module("tweetApp", [ 'ngRoute', 'ngResource','ngSanitize' ]);
 
 tweetApp.config(function($routeProvider) {
 	$routeProvider.when('/getTweets', {
 		controller : 'tweetsController',
+		templateUrl : '/views/feedback.html'	
+	}).when('/getMessages', {
+		controller : 'messageController',
 		templateUrl : '/views/feedback.html'	
 	}).when('/rankFestivalOnWordAmazing', {
 		controller : 'wordController',
@@ -33,12 +36,23 @@ function Tweet( resource ) {
 		//
 		scope.message = "started to retrieve tweets";
 		
-		var tweets = resource('/retrieveTweets');
+//		var tweets = resource('/retrieveTweets');
+		var tweets = resource('/camel/retrieveTweets');
 		tweets.get(function(response){
 			scope.message = response.message;
 		});
 	}
 	
+	this.getMessages = function( scope, http ) {
+		http.get("/camel/getMessages").
+			success(function(data, status, headers, config){
+				scope.message = data;
+			}).
+			error(function(data,status,headers,config){
+				scope.message = "error occured with status " + status;
+			})
+		
+	}	
 	
 	this.getWordRankAmazing = function(scope) {
 		scope.message = "Going for the word rank of word amazing";
@@ -86,6 +100,10 @@ tweetApp.controller("homeController", [ '$scope', function($scope) {
 // Controller to get all tweets
 tweetApp.controller("tweetsController", [ '$scope','tweetService', function($scope, tweetService) {	
 	tweetService.getTweets( $scope );		
+} ]);
+// Controller to get all messages
+tweetApp.controller("messageController", [ '$scope', '$http','tweetService', function($scope, $http, tweetService) {	
+	tweetService.getMessages( $scope, $http );		
 } ]);
 //Controller to get handle words
 tweetApp.controller("wordController", [ '$scope','tweetService', function($scope, tweetService) {	

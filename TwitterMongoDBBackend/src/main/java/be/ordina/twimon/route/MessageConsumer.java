@@ -35,10 +35,10 @@ public class MessageConsumer {
                 break;
             }
 
-            count = count + 1; 
-            
             // do something with body
-            msgBody = msgBody + "Message " + count + ": "+ msg + "<br>";
+            msgBody = msgBody + "Message " + count + ": "+ msg + "<br/>";
+            
+            count = count + 1; 
         }
         
         if (msgBody.length() == 0) {
